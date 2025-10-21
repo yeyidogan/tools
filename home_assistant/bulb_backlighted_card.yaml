@@ -1,0 +1,30 @@
+type: custom:button-card
+entity: light.esp32s_ait01_hole_lights
+section_mode: true
+color: ivory
+state:
+  - value: "off"
+    icon: mdi:lightbulb-off
+styles:
+  name:
+    - color: null
+  card:
+    - "-webkit-box-shadow": 0px 0px 9px 3px var(--button-card-light-color)
+    - box-shadow: 0px 0px 9px 3px var(--button-card-light-color)
+    - background-color: null
+  grid:
+    - grid-template-areas: null
+    - grid-template-rows: min-content 1fr min-content min-content
+    - grid-template-columns: 1fr
+  icon:
+    - color: |
+        [[[
+          if (entity.state == 'on') return 'white';
+          if (entity.state == 'off') return 'darkGrey';
+          else return 'yellow';
+        ]]]
+    - opacity: |
+        [[[
+          var bri = states['light.esp32s_ait01_hole_lights'].attributes.brightness;
+          return 0.2 + (bri / 255);
+        ]]]
