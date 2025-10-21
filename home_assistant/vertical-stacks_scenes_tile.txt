@@ -1,0 +1,16 @@
+type: vertical-stack
+title: Senaryolar
+cards:
+  - type: tile
+    entity: scene.welcome
+    color: green
+    show_entity_picture: true
+    vertical: false
+    features_position: bottom
+  - type: tile
+    entity: scene.goodbye
+    color: red
+    show_entity_picture: true
+    vertical: false
+    features_position: bottom
+    

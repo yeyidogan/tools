@@ -1,0 +1,37 @@
+type: vertical-stack
+cards:
+  - type: custom:button-card
+    entity: scene.welcome
+    section_mode: true
+    color: green
+    tap_action:
+      action: call-service
+      service: scene.turn_on
+      service_data:
+        entity_id: scene.welcome
+    styles:
+      name:
+        - color: ivory
+      card:
+        - "-webkit-box-shadow": 0px 0px 9px 3px var(--button-card-light-color)
+        - box-shadow: 0px 0px 9px 3px var(--button-card-light-color)
+        - background-color: null
+  - type: custom:button-card
+    entity: scene.goodbye
+    section_mode: true
+    color: red
+    tap_action:
+      action: call-service
+      service: scene.turn_on
+      service_data:
+        entity_id: scene.goodbye
+    styles:
+      name:
+        - color: ivory
+      card:
+        - "-webkit-box-shadow": 0px 0px 9px 3px var(--button-card-light-color)
+        - box-shadow: 0px 0px 9px 3px var(--button-card-light-color)
+        - background-color: null
+grid_options:
+  columns: 6
+  rows: 5
