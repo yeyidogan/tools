@@ -1,0 +1,58 @@
+esphome:
+  name: esp32s-ait01
+  friendly_name: ESP32S-AiT01
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Configure the inputs
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode:
+        input: true
+        pullup: false
+      inverted: true
+    name: "Input"
+    use_interrupt: True
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 100ms
+        
+# Configure the outputs
+output:
+  - platform: ledc
+    pin: GPIO2
+    id: led_output
+
+light:
+  - platform: monochromatic
+    name: "Hole Lights"
+    output: led_output
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "GSpzSeXxc74i2dNzd2jmaxIc0AB2az8MUM8Sgu6ctmA="
+
+ota:
+  - platform: esphome
+    password: "Yilmaz"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp32S-Ait01 Fallback Hotspot"
+    password: "Asx12345678?."
+
+captive_portal:
+    

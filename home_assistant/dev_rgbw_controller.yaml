@@ -1,0 +1,118 @@
+esphome:
+  name: esp32s-fan-controller
+  friendly_name: "ESP32-FSC"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+
+# Configure the inputs
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode:
+        input: true
+        pullup: false
+      inverted: true
+    name: "Input"
+    use_interrupt: True
+    filters:
+      - delayed_on: 100ms
+      - delayed_off: 100ms
+        
+# Configure the outputs
+output:
+  - platform: gpio
+    pin: GPIO1
+    id: fan_enable
+  - platform: gpio
+    pin: GPIO2
+    id: osc_enable
+  - platform: gpio
+    pin: GPIO3
+    id: dir_out
+  - platform: ledc
+    pin: GPIO4
+    id: pwm_pin
+    frequency: 1000Hz
+  - platform: gpio
+    pin: GPIO16
+    id: speed_1
+  - platform: gpio
+    pin: GPIO17
+    id: speed_2
+  - platform: gpio
+    pin: GPIO18
+    id: speed_3
+  - platform: gpio
+    pin: GPIO19
+    id: speed_4
+  
+fan:
+  - platform: speed
+    output: pwm_pin
+    name: "Meeting Room Fan"
+    id: pwm_fan
+    restore_mode: ALWAYS_OFF
+    oscillation_output: osc_enable
+    direction_output: dir_out
+    speed_count: 25
+    on_speed_set: 
+      then:
+        - lambda: |-
+            if (id(pwm_fan).speed == 0) {
+              id(speed_1).turn_off();
+              id(speed_2).turn_off();
+              id(speed_3).turn_off();
+              id(speed_4).turn_off();
+            }
+            else if (id(pwm_fan).speed < 25) {
+              id(speed_1).turn_on();
+              id(speed_2).turn_off();
+              id(speed_3).turn_off();
+              id(speed_4).turn_off();
+            }
+            else if (id(pwm_fan).speed < 50) {
+              id(speed_1).turn_on();
+              id(speed_2).turn_on();
+              id(speed_3).turn_off();
+              id(speed_4).turn_off();
+            }
+            else if (id(pwm_fan).speed < 75) {
+              id(speed_1).turn_on();
+              id(speed_2).turn_on();
+              id(speed_3).turn_on();
+              id(speed_4).turn_off();
+            }
+            else {
+              id(speed_1).turn_on();
+              id(speed_2).turn_on();
+              id(speed_3).turn_on();
+              id(speed_4).turn_on();
+            }
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "GSpzSeXxc74i2dNzd2jmaxIc0AB2az8MUM8Sgu6ctmA="
+
+ota:
+  - platform: esphome
+    password: "Yilmaz"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp32S-FSC Fallback Hotspot"
+    password: "Asx12345678?."
+
+captive_portal:
+    
