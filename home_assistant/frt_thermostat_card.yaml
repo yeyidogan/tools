@@ -1,0 +1,15 @@
+type: thermostat
+entity: climate.esp32_climate_thermostat_climate_controller
+show_current_as_primary: false
+features:
+  - type: climate-hvac-modes
+    style: icons
+  - type: climate-fan-modes
+    style: icons
+    fan_modes:
+      - off
+      - low
+      - medium
+      - high
+      - auto
+      
