@@ -12,7 +12,7 @@ esp32:
 binary_sensor:
   - platform: gpio
     pin:
-      number: GPIO0
+      number: GPIO15
       mode:
         input: true
         pullup: false
@@ -38,28 +38,38 @@ sensor:
 
 # Configure the outputs
 output:
-  - platform: gpio
-    pin: GPIO1
-    id: cooler_output
-  - platform: gpio
-    pin: GPIO2
-    id: heater_output
-  - platform: gpio
-    pin: GPIO3
-    id: fan_low_output
   - platform: ledc
-    pin: GPIO4
-    id: fan_medium_output
+    pin: GPIO2
+    id: fan_pwm_output
     frequency: 1000Hz
   - platform: gpio
-    pin: GPIO16
+    pin: GPIO0
+    id: cooler_output
+  - platform: gpio
+    pin: GPIO4
+    id: heater_output
+  - platform: gpio
+    pin: GPIO5
+    id: fan_low_output
+  - platform: gpio
+    pin: GPIO25
+    id: fan_medium_output
+  - platform: gpio
+    pin: GPIO26
     id: fan_high_output
   - platform: gpio
-    pin: GPIO17
+    pin: GPIO12
     id: swing_vertical_output
   - platform: gpio
-    pin: GPIO18
+    pin: GPIO14
     id: swing_horizontal_output
+  - platform: gpio
+    pin: GPIO32
+    id: osc_output
+  - platform: gpio
+    pin: GPIO33
+    id: dir_output
+
 
 switch:
   - platform: template
@@ -143,6 +153,7 @@ climate:
       - switch.turn_off: cooler_switch
       - switch.turn_off: heater_switch
     min_fan_mode_switching_time: 20s
+    startup_delay: true
     fan_mode_off_action:
       - switch.turn_off: fan_speed_low_switch
       - switch.turn_off: fan_speed_medium_switch
@@ -188,10 +199,18 @@ climate:
 
 # Fan kontrolü (manuel ayarlanabilir)
 fan:
+  - platform: speed
+    output: fan_pwm_output
+    name: "Meeting Room Fan"
+    id: pwm_fan
+    restore_mode: ALWAYS_OFF
+    oscillation_output: osc_output
+    direction_output: dir_output
+    speed_count: 25
   - platform: binary
     name: "Fan Low"
     output: fan_low_output
-  - platform: speed
+  - platform: binary
     name: "Fan Medium"
     output: fan_medium_output
   - platform: binary
