@@ -206,7 +206,6 @@ fan:
     restore_mode: ALWAYS_OFF
     oscillation_output: osc_output
     direction_output: dir_output
-    speed_count: 25
   - platform: binary
     name: "Fan Low"
     output: fan_low_output
@@ -216,6 +215,47 @@ fan:
   - platform: binary
     name: "Fan High"
     output: fan_high_output
+
+globals:
+  - id: g_int_fan_speed
+    type: int
+    restore_value: no
+    initial_value: '0'
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          static int fan_speed = 0;
+          static int inhibit = 0;
+
+          fan_speed += 10;
+          if (fan_speed > 100) {
+            fan_speed = 0;
+          }
+
+          if (fan_speed == 0) {
+            ++inhibit;
+            if (inhibit < 10) {
+              auto turn_off = id(pwm_fan).turn_off();
+              turn_off.perform();
+              fan_speed = 100;
+              return;
+            }
+          }
+          else {
+            inhibit = 0;
+          }
+
+          // Hızı uygula
+          auto call = id(pwm_fan).make_call();
+          call.set_speed(fan_speed);
+          call.perform();
+          // Eğer fan kapalıysa önce aç
+          if (!id(pwm_fan).state) {
+            auto turn_on = id(pwm_fan).turn_on();
+            turn_on.perform();
+          }
 
 
 # Enable logging
