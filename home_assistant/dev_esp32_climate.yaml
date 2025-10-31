@@ -144,7 +144,11 @@ switch:
       - output.turn_off: dummy_output
 
 globals:
-  - id: g_int_fan_switch_speed
+  - id: g_int_fan_target_switch_speed
+    type: int
+    restore_value: no
+    initial_value: '0'
+  - id: g_int_fan_actual_switch_speed
     type: int
     restore_value: no
     initial_value: '0'
@@ -187,119 +191,22 @@ climate:
     min_fan_mode_switching_time: 5s
     startup_delay: true
     fan_mode_off_action:
-      - switch.turn_off: fan_speed_low_switch
-      - switch.turn_off: fan_speed_medium_switch
-      - switch.turn_off: fan_speed_high_switch
-      - fan.turn_off: pwm_fan
+      - lambda: |-
+          id(g_int_fan_target_switch_speed) = 0;
     fan_mode_low_action:
       - fan.turn_on: pwm_fan
-      - if:
-          condition:
-            switch.is_off: fan_speed_low_switch
-          then:
-            - if:
-                condition:
-                  switch.is_on: fan_speed_high_switch
-                then:
-                  - switch.turn_off: fan_speed_high_switch
-                  - delay: 0.5s
-            - if:
-                condition:
-                  switch.is_on: fan_speed_medium_switch
-                then:
-                  - switch.turn_off: fan_speed_medium_switch
-                  - delay: 0.5s
-      - switch.turn_on: fan_speed_low_switch
       - lambda: |-
-          auto call = id(pwm_fan).make_call();
-          call.set_speed(20);
-          call.perform();
+          id(g_int_fan_target_switch_speed) = 1;
     fan_mode_medium_action:
       - fan.turn_on: pwm_fan
-      - if:
-          condition:
-            switch.is_off: fan_speed_medium_switch
-          then:
-            - if:
-                condition:
-                  switch.is_on: fan_speed_high_switch
-                then:
-                  - switch.turn_off: fan_speed_high_switch
-                  - delay: 0.5s
-                else:
-                  - if:
-                      condition:
-                        switch.is_on: fan_speed_low_switch
-                      then:
-                        - switch.turn_off: fan_speed_low_switch
-                        - delay: 0.5s
-                      else:
-                        - switch.turn_on: fan_speed_low_switch
-                        - lambda: |-
-                            auto call = id(pwm_fan).make_call();
-                            call.set_speed(20);
-                            call.perform();
-                        - delay: 2s
-                        - switch.turn_off: fan_speed_low_switch
-                        - delay: 0.5s
-      - switch.turn_on: fan_speed_medium_switch
       - lambda: |-
-          auto call = id(pwm_fan).make_call();
-          call.set_speed(60);
-          call.perform();
+          id(g_int_fan_target_switch_speed) = 2;
     fan_mode_high_action:
       - fan.turn_on: pwm_fan
-      - if: 
-          condition:
-            switch.is_off: fan_speed_high_switch
-          then:
-            - if: 
-                condition:
-                  and:
-                    - switch.is_off: fan_speed_low_switch
-                    - switch.is_off: fan_speed_medium_switch
-                then:
-                  - switch.turn_on: fan_speed_low_switch
-                  - lambda: |-
-                      auto call = id(pwm_fan).make_call();
-                      call.set_speed(20);
-                      call.perform();
-                  - delay: 2s
-                  - switch.turn_off: fan_speed_low_switch
-                  - delay: 0.5s
-                  - switch.turn_on: fan_speed_medium_switch
-                  - lambda: |-
-                      auto call = id(pwm_fan).make_call();
-                      call.set_speed(60);
-                      call.perform();
-                  - delay: 2s
-                  - switch.turn_off: fan_speed_medium_switch
-                  - delay: 0.5s
-                else:
-                  - if:
-                      condition:
-                        switch.is_on: fan_speed_low_switch
-                      then:
-                        - switch.turn_off: fan_speed_low_switch
-                        - delay: 0.5s
-                        - switch.turn_on: fan_speed_medium_switch
-                        - lambda: |-
-                            auto call = id(pwm_fan).make_call();
-                            call.set_speed(60);
-                            call.perform();
-                        - delay: 2s
-                        - switch.turn_off: fan_speed_medium_switch
-                        - delay: 0.5s
-                      else:
-                        - switch.turn_off: fan_speed_medium_switch
-                        - delay: 0.5s
-      - switch.turn_on: fan_speed_high_switch
       - lambda: |-
-          auto call = id(pwm_fan).make_call();
-          call.set_speed(100);
-          call.perform();
+          id(g_int_fan_target_switch_speed) = 3;
     fan_mode_auto_action:
-      - switch.turn_off: dummy_switch
+      - fan.turn_on: pwm_fan
     swing_off_action:
       - switch.turn_off: swing_horizontal_switch
       - switch.turn_off: swing_vertical_switch
@@ -366,7 +273,10 @@ interval:
             target = id(my_climate).target_temperature_high;
             diff = fabs(target - current);
           }
-          if (id(my_climate).mode != CLIMATE_MODE_OFF) {
+          if (id(my_climate).mode == CLIMATE_MODE_OFF) {
+            id(g_int_fan_target_switch_speed) = 0;
+          }
+          else {
             if (id(my_climate).fan_mode == CLIMATE_FAN_AUTO) {
               if (diff <= 0.5) {
                 fan_speed = 10;
@@ -377,37 +287,73 @@ interval:
               if (fan_speed > 100) {
                 fan_speed = 100;
               }
+
               if (fan_speed < 20) {
-                id(fan_speed_medium_switch).turn_off();
-                id(fan_speed_high_switch).turn_off();
-                vTaskDelay(1000/portTICK_PERIOD_MS);
-                id(fan_speed_low_switch).turn_on();
+                id(g_int_fan_target_switch_speed) = 1;
               }
               else if (fan_speed < 60) {
-                id(fan_speed_low_switch).turn_off();
-                id(fan_speed_high_switch).turn_off();
-                vTaskDelay(1000/portTICK_PERIOD_MS);
-                id(fan_speed_medium_switch).turn_on();
+                id(g_int_fan_target_switch_speed) = 2;
               }
               else {
+                id(g_int_fan_target_switch_speed) = 3;
+              }
+            }
+
+            if (id(my_climate).fan_mode == CLIMATE_FAN_OFF) {
+              id(g_int_fan_target_switch_speed) = 0;
+            }
+            else {
+              if (id(g_int_fan_actual_switch_speed) < id(g_int_fan_target_switch_speed)) {
+                id(g_int_fan_actual_switch_speed) += 1;
+                if (id(g_int_fan_actual_switch_speed) > id(g_int_fan_target_switch_speed)) {
+                  id(g_int_fan_actual_switch_speed) = id(g_int_fan_target_switch_speed);
+                }
                 id(fan_speed_low_switch).turn_off();
                 id(fan_speed_medium_switch).turn_off();
-                vTaskDelay(1000/portTICK_PERIOD_MS);
-                id(fan_speed_high_switch).turn_on();
+                id(fan_speed_high_switch).turn_off();
+                vTaskDelay(500/portTICK_PERIOD_MS);
               }
-
-              auto call = id(pwm_fan).make_call();
-              call.set_speed(fan_speed);
-              call.perform();
-              /*
-              if (!id(pwm_fan).state) {
-                auto turn_on = id(pwm_fan).turn_on();
-                turn_on.perform();
-              } */
+              else if (id(g_int_fan_actual_switch_speed) > id(g_int_fan_target_switch_speed)) {
+                id(g_int_fan_actual_switch_speed) -= 1;
+                if (id(g_int_fan_actual_switch_speed) < id(g_int_fan_target_switch_speed)) {
+                  id(g_int_fan_actual_switch_speed) = id(g_int_fan_target_switch_speed);
+                }
+                id(fan_speed_low_switch).turn_off();
+                id(fan_speed_medium_switch).turn_off();
+                id(fan_speed_high_switch).turn_off();
+                vTaskDelay(500/portTICK_PERIOD_MS);
+              }
             }
           }
 
-            
+          if (id(g_int_fan_actual_switch_speed) == 0) {
+            id(fan_speed_low_switch).turn_off();
+            id(fan_speed_medium_switch).turn_off();
+            id(fan_speed_high_switch).turn_off();
+            auto call = id(pwm_fan).make_call();
+            call.set_speed(0);
+            call.perform();
+            auto turn_off = id(pwm_fan).turn_off();
+            turn_off.perform();
+          }
+          else if (id(g_int_fan_actual_switch_speed) == 1) {
+            id(fan_speed_low_switch).turn_on();
+            auto call = id(pwm_fan).make_call();
+            call.set_speed(20);
+            call.perform();
+          }
+          else if (id(g_int_fan_actual_switch_speed) == 2) {
+            id(fan_speed_medium_switch).turn_on();
+            auto call = id(pwm_fan).make_call();
+            call.set_speed(60);
+            call.perform();
+          }
+          else if (id(g_int_fan_actual_switch_speed) == 3) {
+            id(fan_speed_high_switch).turn_on();
+            auto call = id(pwm_fan).make_call();
+            call.set_speed(100);
+            call.perform();
+          }
 
 # Enable logging
 logger:
