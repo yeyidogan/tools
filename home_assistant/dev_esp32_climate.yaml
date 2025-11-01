@@ -170,83 +170,20 @@ climate:
           id(g_int_fan_target_switch_speed) = 0;
       - switch.turn_off: cooler_switch
       - switch.turn_off: heater_switch
-    cool_mode:
-      - lambda: |-
-          if (id(my_climate).fan_mode == CLIMATE_FAN_LOW) {
-            id(g_int_fan_target_switch_speed) = 1;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_MEDIUM) {
-            id(g_int_fan_target_switch_speed) = 2;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_HIGH) {
-            id(g_int_fan_target_switch_speed) = 3;
-          }
     cool_action:
       - switch.turn_on: cooler_switch
-      - lambda: |-
-          if (id(my_climate).fan_mode == CLIMATE_FAN_LOW) {
-            id(g_int_fan_target_switch_speed) = 1;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_MEDIUM) {
-            id(g_int_fan_target_switch_speed) = 2;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_HIGH) {
-            id(g_int_fan_target_switch_speed) = 3;
-          }
-    heat_mode:
-      - lambda: |-
-          if (id(my_climate).fan_mode == CLIMATE_FAN_LOW) {
-            id(g_int_fan_target_switch_speed) = 1;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_MEDIUM) {
-            id(g_int_fan_target_switch_speed) = 2;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_HIGH) {
-            id(g_int_fan_target_switch_speed) = 3;
-          }
     heat_action:
       - switch.turn_on: heater_switch
-      - lambda: |-
-          if (id(my_climate).fan_mode == CLIMATE_FAN_LOW) {
-            id(g_int_fan_target_switch_speed) = 1;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_MEDIUM) {
-            id(g_int_fan_target_switch_speed) = 2;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_HIGH) {
-            id(g_int_fan_target_switch_speed) = 3;
-          }
     idle_action:
       - switch.turn_off: cooler_switch
       - switch.turn_off: heater_switch
+    auto_mode: 
+      - switch.turn_off: dummy_switch
     heat_cool_mode:
       - switch.turn_off: dummy_switch
-      - lambda: |-
-          if (id(my_climate).fan_mode == CLIMATE_FAN_LOW) {
-            id(g_int_fan_target_switch_speed) = 1;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_MEDIUM) {
-            id(g_int_fan_target_switch_speed) = 2;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_HIGH) {
-            id(g_int_fan_target_switch_speed) = 3;
-          }
     fan_only_action:
       - switch.turn_off: cooler_switch
       - switch.turn_off: heater_switch
-      - lambda: |-
-          if (id(my_climate).fan_mode == CLIMATE_FAN_LOW) {
-            id(g_int_fan_target_switch_speed) = 1;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_MEDIUM) {
-            id(g_int_fan_target_switch_speed) = 2;
-          }
-          else if (id(my_climate).fan_mode == CLIMATE_FAN_HIGH) {
-            id(g_int_fan_target_switch_speed) = 3;
-          }
-          if (id(g_int_fan_target_switch_speed) == 0) {
-            id(g_int_fan_target_switch_speed) = 1;
-          }
     min_fan_mode_switching_time: 5s
     startup_delay: true
     fan_mode_off_action:
@@ -275,6 +212,23 @@ climate:
     swing_both_action:
       - switch.turn_on: swing_horizontal_switch
       - switch.turn_on: swing_vertical_switch
+    
+    on_control:
+      - lambda: |-
+          if (x.get_mode() != CLIMATE_MODE_OFF) {
+            if (id(my_climate).fan_mode == CLIMATE_FAN_LOW) {
+              id(g_int_fan_target_switch_speed) = 1;
+            }
+            else if (id(my_climate).fan_mode == CLIMATE_FAN_MEDIUM) {
+              id(g_int_fan_target_switch_speed) = 2;
+            }
+            else if (id(my_climate).fan_mode == CLIMATE_FAN_HIGH) {
+              id(g_int_fan_target_switch_speed) = 3;
+            }
+            if (id(g_int_fan_target_switch_speed) == 0) {
+              id(g_int_fan_target_switch_speed) = 1;
+            }
+          }
 
     default_preset: Home
     preset:
