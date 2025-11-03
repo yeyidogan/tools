@@ -230,11 +230,28 @@ climate:
             }
           }
 
-    default_preset: Home
+    default_preset: Sleep
     preset:
+      - name: Sleep
+        default_target_temperature_low: 20 °C
+        default_target_temperature_high: 23 °C
+        mode: AUTO
+        fan_mode: LOW
+        swing_mode: BOTH
+      - name: Away
+        default_target_temperature_low:  18 °C
+        default_target_temperature_high: 20 °C
+        mode: "OFF"
+        fan_mode: "OFF"
+        swing_mode: "OFF"
       - name: Home
         default_target_temperature_low: 20 °C
         default_target_temperature_high: 22 °C
+        mode: HEAT_COOL
+        fan_mode: HIGH
+        swing_mode: BOTH
+    
+    on_boot_restore_from: default_preset
 
 # Fan kontrolu (manuel ayarlanabilir)
 fan:
@@ -245,15 +262,19 @@ fan:
     restore_mode: ALWAYS_OFF
     oscillation_output: osc_output
     direction_output: dir_output
+    internal: false
   - platform: binary
     name: "Fan Low"
     output: fan_low_output
+    internal: false
   - platform: binary
     name: "Fan Medium"
     output: fan_medium_output
+    internal: false
   - platform: binary
     name: "Fan High"
     output: fan_high_output
+    internal: false
 
 number:
   - platform: template
@@ -280,6 +301,14 @@ interval:
           float target = id(my_climate).target_temperature_low;
           float diff = fabs(target - current);
 
+          /*
+          if (my_interval == 0) { //startup only action
+            auto call = id(my_climate).make_call();
+            call.set_preset("Sleep");
+            call.perform();
+          }
+          */
+          
           if (id(my_climate).action == CLIMATE_ACTION_COOLING) {
             target = id(my_climate).target_temperature_high;
             diff = fabs(target - current);
@@ -311,7 +340,7 @@ interval:
             }
           }
 
-          if (my_interval > 10) {
+          if (my_interval > 11) {
             int update_state = 0;
             if (id(g_int_fan_actual_switch_speed) < id(g_int_fan_target_switch_speed)) {
               id(g_int_fan_actual_switch_speed) += 1;
@@ -340,7 +369,7 @@ interval:
             }
 
             if (update_state == 1) {
-              my_interval = 0;
+              my_interval = 1;
               if (id(g_int_fan_actual_switch_speed) == 0) {
                 id(fan_speed_low_switch).turn_off();
                 id(fan_speed_medium_switch).turn_off();
