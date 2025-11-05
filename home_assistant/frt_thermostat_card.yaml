@@ -11,7 +11,9 @@ features:
       - low
       - medium
       - high
-      - "on"
       - auto
   - type: climate-swing-modes
     style: icons
+grid_options:
+  columns: 12
+  rows: 10

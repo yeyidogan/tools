@@ -12,12 +12,13 @@ esp32:
 binary_sensor:
   - platform: gpio
     pin:
-      number: GPIO15
+      number: GPIO0
       mode:
         input: true
         pullup: false
       inverted: true
-    name: "Input"
+    device_class: motion
+    name: "Hareket Sensor Toplantı Odası"
     use_interrupt: True
     filters:
       - delayed_on: 100ms
@@ -48,7 +49,7 @@ output:
     id: fan_pwm_output
     frequency: 1000Hz
   - platform: gpio
-    pin: GPIO0
+    pin: GPIO17
     id: cooler_output
   - platform: gpio
     pin: GPIO4
