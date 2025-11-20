@@ -1,0 +1,1 @@
+powershell.exe -Command "Get-Date;'week';(Get-Culture).Calendar.GetWeekOfYear((Get-Date),(Get-Culture).DateTimeFormat.CalendarWeekRule,(Get-Culture).DateTimeFormat.FirstDayOfWeek);'day';(Get-Date).DayOfYear;pause"
