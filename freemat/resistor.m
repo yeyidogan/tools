@@ -21,14 +21,16 @@ Rpot = 10e3;
 Rmid = 5e3;
 Rx = [0:1e3:10e3];
 
-Rup = 1000e3;
-Rdown = 330e3;
+Rup = 100e3;
+Rdown = 47e3;
 
 for i = 1:11
     Redown = (Rx(i) * (Rup+Rdown)) / (Rx(i) + (Rup+Rdown));
     Vout2 = Vs * Redown / (Rpot - Rx(i) + Redown);
-    Vout2 = Vout2 - 150e-9 * (Rpot - Redown);
+    Vout2 = Vout2 - 150e-9 * (Rup);
     printf('POT Vout = %.2f V\n', Vout2);
+    Vout3(i) = Vout2;
 end
+plot(Vout3);
 
     

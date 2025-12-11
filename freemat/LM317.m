@@ -4,7 +4,7 @@ Vref = 1.25;
 Iadj = 100e-6;
 
 R1 = 1e3;
-R2 = 6.6e3;
+R2 = 6.8e3;
 
 Vout = (Vref * (1 + R2 / R1)) + (Iadj * R2);
 
