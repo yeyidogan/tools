@@ -7,7 +7,7 @@ Cout = 100e-6;
 Cesr = 75e-3;
 fsw = 850e3;
 Vfb =  1.22;
-Cr1 = 150e-9;%8e-12;
+Cr1 = 150e-12;%8e-12;
 
 Irms = Iout * sqrt(D - (2*D^2/eff) + (D^2/eff^2));
 
@@ -32,5 +32,5 @@ printf('Vout set = %.1f V\n', Vo_set);
 
 fz = 1 / (2 * pi * R1 * Cr1);
 fp = 1 / (2 * pi * (R1*R2 / (R1+R2)) * Cr1);
-printf('fz = %.0f kHz\n', fz);
-printf('fp = %.0f kHz\n', fp);
+printf('fz = %.0f kHz\n', fz/1000);
+printf('fp = %.0f kHz\n', fp/1000);
