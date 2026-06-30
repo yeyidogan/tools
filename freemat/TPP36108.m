@@ -1,5 +1,5 @@
-Rup = 15e3;
-Rdown = 3.3e3;
+Rup = 22.05e3;
+Rdown = 3.0e3;
 
 Vout = 0.6 / Rdown * (Rdown + Rup);
 
@@ -16,3 +16,8 @@ R1 = (Venl*(Vin_start - Venh) - Venh*(Vin_stop - Venl)) / (Venh*Ienh - Venl*Ienl
 R2 = Venh / (Ienl + (Vin_start-Venh)/R1);
 printf('R1 = %.1f kOhm\n', R1 / 1000);
 printf('R2 = %.1f kOhm\n', R2 / 1000);
+
+R1_m = 330e3;
+R2_m = 330e9;
+Vin_start_m = (((Venh / R2_m) - Ienl) * R1_m) + Venh;
+printf('Vin_start_m = %.1f V\n', Vin_start_m);
