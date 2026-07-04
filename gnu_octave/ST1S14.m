@@ -1,4 +1,4 @@
-Vin = 24;
+Vin = 16;
 D = 0.5;
 Iout = 1;
 Vout = 5;
@@ -25,7 +25,7 @@ printf('L = %.0f uH\n', L * 1e6);
 
 Ipeak = Iout + Idelta / 2;
 
-R1 = 5600;%68e3;
+R1 = 6800;%68e3;
 R2 = 3300;%22e3;
 Vo_set = Vfb * (1 + R1 / R2);
 printf('Vout set = %.1f V\n', Vo_set);
