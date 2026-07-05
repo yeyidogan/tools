@@ -1,4 +1,4 @@
-Rup = 22.05e3;
+Rup = 23.1e3;
 Rdown = 3.0e3;
 
 Vout = 0.6 / Rdown * (Rdown + Rup);
